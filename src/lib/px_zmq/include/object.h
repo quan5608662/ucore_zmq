@@ -8,7 +8,6 @@
 
 namespace px_zmq
 {
-class MsgQ;
 class  PXAPI Object
 {
 public:
