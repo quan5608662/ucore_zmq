@@ -1,0 +1,5 @@
+#include "testa.h"
+
+DECLARE_PLUGIN()
+OBJECT_EXPORT(TestA)
+DECLARE_PLUGIN_END()

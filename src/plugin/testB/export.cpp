@@ -1,0 +1,5 @@
+#include "testb.h"
+
+DECLARE_PLUGIN()
+OBJECT_EXPORT(TestB)
+DECLARE_PLUGIN_END()

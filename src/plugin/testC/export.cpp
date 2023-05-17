@@ -1,0 +1,5 @@
+#include "testc.h"
+
+DECLARE_PLUGIN()
+OBJECT_EXPORT(TestC)
+DECLARE_PLUGIN_END()
