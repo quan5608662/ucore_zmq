@@ -1,24 +1,24 @@
-#ifndef PX_ENV_H
-#define PX_ENV_H
+#ifndef UZMQ_ENV_H
+#define UZMQ_ENV_H
 
 
-#include <platform.h>
+#include "uzmq/platform.h"
 #include <boost/property_tree/ptree.hpp>
 
-namespace px_zmq{
+namespace uzmq{
 
-class PXAPI Environment
+class UZMQAPI Environment
 {
 public:
     template<class T>
     static inline T Variable(const std::string& name, const T& default_value=T())
     {
-        return CProperties().get<T>(name,default_value);
+        return cProperties().get<T>(name,default_value);
     }
 
     static inline std::string Variable(const std::string& name, const std::string& default_value=std::string())
     {
-        return CProperties().get<std::string>(name,default_value);
+        return cProperties().get<std::string>(name,default_value);
     }
 
     static std::string SourcePath();
@@ -26,7 +26,7 @@ public:
     template<class T>
     static inline void Update(const std::string& name, const T& value,bool saved=true)
     {
-        Properties().put<T>(name,value);
+        properties().put<T>(name,value);
         if(saved)
         {
            Save();
@@ -37,9 +37,9 @@ public:
 
 
 private:
-    static const boost::property_tree::ptree& CProperties();
+    static const boost::property_tree::ptree& cProperties();
 
-    static  boost::property_tree::ptree& Properties();
+    static  boost::property_tree::ptree& properties();
 
     static void Save();
 };
@@ -47,12 +47,12 @@ private:
 
 }
 
-#define PX_ENV  px_zmq::Environment::Variable
+#define PX_ENV  uzmq::Environment::Variable
 
-#define PX_SET_ENV px_zmq::Environment::Update
+#define PX_SET_ENV uzmq::Environment::Update
 
-#define PX_ENV_PATH() px_zmq::Environment::SourcePath()
+#define PX_ENV_PATH() uzmq::Environment::SourcePath()
 
-#define PX_PRESET_ENV px_zmq::Environment::Preset
+#define PX_PRESET_ENV uzmq::Environment::Preset
 
-#endif // ENV_H
+#endif // UZMQ_ENV_H

@@ -1,4 +1,5 @@
 #include "router.h"
+#include "uzmq/log.h"
 
 Router::Router(std::shared_ptr<zmq::context_t> ctx, const int& pubPort, const int& subPort, const std::string& comType)
     : mCtx(ctx)
@@ -13,7 +14,7 @@ Router::~Router()
     mXSub->close();
     mXPub->close();
     wait();
-    std::cout << "release proxy done" << std::endl;
+    PX_ERROR()  << "release proxy done";
 }
 
 bool Router::startUp()
@@ -23,7 +24,7 @@ bool Router::startUp()
     {
         try
         {
-            std::cout << "Starting proxy..." << std::endl;
+            PX_ERROR()  << "Starting proxy...";
 
             // Create mXSub XSUB socket
             mXSub = std::make_unique<zmq::socket_t>(*mCtx.lock(), zmq::socket_type::xsub);
@@ -46,7 +47,7 @@ bool Router::startUp()
         catch(zmq::error_t e)
         {
             result.set_value(false);
-            std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+            PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
         }
         return false;
     });

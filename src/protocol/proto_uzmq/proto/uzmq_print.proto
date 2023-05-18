@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package heygears.proto_px.proj;
+
+
+
+message DisplayInfo{
+    enum SourceType{
+        Base64 = 0;
+        Filepath = 1;
+    }
+
+    SourceType type = 1;
+    string source = 2;
+    int32 power  =3;
+    int32 time = 4;
+}
+
+
+message GrayValue{
+    int32 index = 1;
+    int32 gray = 2;
+}
+
+message DisplayPreview{
+    string previewPic = 1;
+}
+
+
+message ImageResize{
+    string base64=1;
+    int32  w=2;
+    int32  h=3;
+}

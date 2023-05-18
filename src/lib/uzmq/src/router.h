@@ -1,5 +1,5 @@
-#ifndef ROUTER_H
-#define ROUTER_H
+#ifndef UZMQ_ROUTER_H
+#define UZMQ_ROUTER_H
 
 #include <zmq.hpp>
 #include <zmq_addon.hpp>

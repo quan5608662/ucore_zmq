@@ -15,8 +15,8 @@ link_directories(${PROJECT_BINARY_DIR})
 link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
 #include_directories(${PROJECT_SOURCE_DIR}/src/lib/ucore/include)
-include_directories(${PROJECT_SOURCE_DIR}/src/lib/px_zmq/include)
-#include_directories(${PROJECT_SOURCE_DIR}/src/protocol)
+include_directories(${PROJECT_SOURCE_DIR}/src/lib/uzmq/include)
+include_directories(${PROJECT_SOURCE_DIR}/src/protocol)
 
 
 #动态生成头文件包含目录

@@ -42,20 +42,20 @@ void TestA::uninit()
 void TestA::SubA(const std::string &msg)
 {
     numA++;
-    PX_LOG_INFO()  << __FUNCTION__ << "SubA:" << msg << "," << numA << "," << std::this_thread::get_id() << std::endl;
+    PX_LOG_INFO()  << __FUNCTION__ << "SubA:" << msg.size() << "," << numA << "," << std::this_thread::get_id();
     //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 }
 
 void TestA::SubB(const std::string &msg)
 {
     numB++;
-    PX_LOG_INFO()  << __FUNCTION__ << "SubB:" << msg << "," << numB << "," << std::this_thread::get_id() << std::endl;
+    PX_LOG_INFO()  << __FUNCTION__ << "SubB:" << msg << "," << numB << "," << std::this_thread::get_id();
 }
 
 
 std::string TestA::RepC(const std::string& msg)
 {
-    PX_LOG_INFO()  << __FUNCTION__ << "RepC:" << msg << "," << std::this_thread::get_id() << std::endl;
+    PX_LOG_INFO()  << __FUNCTION__ << "RepC:" << msg.size() << "," << std::this_thread::get_id();
     //std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     numC++;
     return "repC:" + std::to_string(numC.load());
@@ -63,7 +63,7 @@ std::string TestA::RepC(const std::string& msg)
 
 std::string TestA::RepD(const std::string& msg)
 {
-    PX_LOG_INFO()  << __FUNCTION__ << "RepD:" << msg << "," << std::this_thread::get_id() << std::endl;
+    PX_LOG_INFO()  << __FUNCTION__ << "RepD:" << msg << "," << std::this_thread::get_id();
     //std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     numD++;
     return "repD:" + std::to_string(numC.load());

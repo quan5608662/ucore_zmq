@@ -12,6 +12,6 @@ add_subdirectory(src/lib)
 
 add_subdirectory(src/plugin)
 
-#add_subdirectory(src/protocol)
+add_subdirectory(src/protocol)
 
 #add_subdirectory(setup)

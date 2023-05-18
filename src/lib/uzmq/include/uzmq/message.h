@@ -1,10 +1,10 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef UZMQ_MESSAGE_H
+#define UZMQ_MESSAGE_H
 
 #include <iostream>
 #include <functional>
 
-namespace px_zmq
+namespace uzmq
 {
 enum ErrorCode
 {

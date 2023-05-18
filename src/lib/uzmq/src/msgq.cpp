@@ -1,6 +1,7 @@
-#include "msg_q.h"
+#include "msgq.h"
+#include "uzmq/log.h"
 
-namespace px_zmq
+namespace uzmq
 {
 MsgQ::MsgQ(std::shared_ptr<zmq::context_t> ctx, const int& pubPort, const int& subPort, const std::string& comType)
     : mCtx(ctx)
@@ -82,7 +83,7 @@ ReplyData MsgQ::request(const int &numTopic, const std::string &msg, int timeout
         }
         catch (zmq::error_t e)
         {
-            std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+            PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
             reply.errorCore = SEND_ERROR;
             return reply;
         }
@@ -127,7 +128,7 @@ void MsgQ::add(const int &numTopic, NoReplyFunc func, bool block)
     }
     catch (zmq::error_t e)
     {
-        std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+        PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
     }
 }
 
@@ -153,7 +154,7 @@ void MsgQ::add(const int &numTopic, ReplyFunc func, bool block)
     }
     catch (zmq::error_t e)
     {
-        std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+        PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
     }
 }
 
@@ -165,40 +166,42 @@ int MsgQ::msgLoop(std::function<void(void)> init, std::function<void(void)> unin
     }
     mStartFlag.store(true);
 
-    if(mHandler.empty())
-    {
-        std::cout << __FUNCTION__ << "," << __LINE__ << "mHandler is empty:" << std::endl;
-        return NO_ERROR;
-    }
-
     int ret = NO_ERROR;
     while(mStartFlag)
     {
-        try
+        if(mHandler.empty())
         {
-            std::vector<zmq::poller_event<>> events;
-            events.resize(mHandler.size());
-            const std::chrono::milliseconds timeout(1000);
-            auto count = mPoller.wait_all(events, timeout);
-            if (!count)
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            continue;
+        }
+        else
+        {
+            try
             {
-                continue;
-            }
-            else
-            {
-                for (auto &event : events)
+                std::vector<zmq::poller_event<>> events;
+                events.resize(mHandler.size());
+                const std::chrono::milliseconds timeout(1000);
+                auto count = mPoller.wait_all(events, timeout);
+                if (!count)
                 {
-                    if(static_cast<int>(event.events) & static_cast<int>(zmq::event_flags::pollin))
+                    continue;
+                }
+                else
+                {
+                    for (auto &event : events)
                     {
-                        handleMsg(event.socket);
+                        if(static_cast<int>(event.events) & static_cast<int>(zmq::event_flags::pollin))
+                        {
+                            handleMsg(event.socket);
+                        }
                     }
                 }
             }
-        }
-        catch (zmq::error_t e)
-        {
-            std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
-            ret = MSG_LOOP_EME_STOP;
+            catch (zmq::error_t e)
+            {
+                PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
+                ret = MSG_LOOP_EME_STOP;
+            }
         }
     }
 
@@ -233,7 +236,7 @@ ErrorCode MsgQ::recvTimeout(const std::shared_ptr<zmq::socket_t> &socket, std::v
                     auto result = zmq::recv_multipart(*socket, std::back_inserter(recvMsgs));
                     if(!result.has_value() || recvMsgs.size() != 2)
                     {
-                        std::cout << __FUNCTION__ << "recv msg is error." << std::endl;
+                        PX_ERROR()  << __FUNCTION__ << "recv msg is error.";
                         return RECV_COUNT_ERROR;
                     }
                     else
@@ -246,7 +249,7 @@ ErrorCode MsgQ::recvTimeout(const std::shared_ptr<zmq::socket_t> &socket, std::v
     }
     catch (zmq::error_t e)
     {
-        std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+        PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
     }
 
     return RECV_MSGS_ERROR;
@@ -279,7 +282,7 @@ bool MsgQ::sendReady(const std::shared_ptr<zmq::socket_t> &socket, int timeout)
     }
     catch (zmq::error_t e)
     {
-        std::cout << __FUNCTION__ << ":catch error:" << e.what() << std::endl;
+        PX_ERROR()  << __FUNCTION__ << ":catch error:" << e.what();
     }
 
     return false;
@@ -295,7 +298,7 @@ int MsgQ::socketSend(const std::shared_ptr<zmq::socket_t> &socket, const std::st
         auto ret = socket->send(dataM, zmq::send_flags::none);
         return ret.value();
     }
-    std::cout << __FUNCTION__ << ":send socket is not ready or socket is nullptr." << std::endl;
+    PX_ERROR()  << __FUNCTION__ << ":send socket is not ready or socket is nullptr.";
     return -1;
 }
 
@@ -305,11 +308,11 @@ void MsgQ::handleMsg(zmq::socket_ref socket)
     auto result = zmq::recv_multipart(socket, std::back_inserter(recvMsgs));
     if(!result.has_value() || recvMsgs.size() != 2)
     {
-        std::cout << __FUNCTION__ << "recv msg is error." << std::endl;
+        PX_ERROR()  << __FUNCTION__ << "recv msg is error.";
         return;
     }
-    //    std::cout << __FUNCTION__ << "[" << recvMsgs[0].to_string() << "] "
-    //              << recvMsgs[1].to_string() << std::endl;
+    //    PX_ERROR()  << __FUNCTION__ << "[" << recvMsgs[0].to_string() << "] "
+    //              << recvMsgs[1].to_string();
 
     auto topic = recvMsgs.at(0).to_string();
     auto msg = recvMsgs.at(1).to_string();

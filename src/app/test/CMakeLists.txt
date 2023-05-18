@@ -10,7 +10,7 @@ project(test)
 #    ${SETUP_RESOURCE_PATH}/setting/env.ini)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} px_zmq)
+target_link_libraries(${PROJECT_NAME} uzmq)
 
 
 

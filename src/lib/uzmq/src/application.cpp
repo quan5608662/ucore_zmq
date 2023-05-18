@@ -1,12 +1,12 @@
-#include "application.h"
+#include "uzmq/application.h"
 #include "appinst.h"
 
-namespace px_zmq
+namespace uzmq
 {
 
 Application::Application(int argc, char *argv[])
 {
-    AppInst::SetArgument(argc, argv);
+    AppInst::setArgument(argc, argv);
 }
 
 Application::~Application()
@@ -16,6 +16,6 @@ Application::~Application()
 
 int Application::exec()
 {
-    return AppInst::Exec();
+    return AppInst::exec();
 }
 }

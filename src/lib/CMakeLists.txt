@@ -1,3 +1,3 @@
-add_subdirectory(px_zmq)
+add_subdirectory(uzmq)
 
 

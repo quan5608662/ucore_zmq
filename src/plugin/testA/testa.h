@@ -1,13 +1,13 @@
 #ifndef TESTA_H
 #define TESTA_H
 
-#include "object.h"
+#include "uzmq/object.h"
 #include <iostream>
 #include <atomic>
 #include <mutex>
 #include <thread>
 
-class TestA: public px_zmq::Object
+class TestA: public uzmq::Object
 {
 public:
     TestA();

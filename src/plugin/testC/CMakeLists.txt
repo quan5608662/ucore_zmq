@@ -11,7 +11,7 @@ file(GLOB SRC_FILES
 
 add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME}  px_zmq)
+target_link_libraries(${PROJECT_NAME}  uzmq)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     PREFIX ""

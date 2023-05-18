@@ -1,13 +1,13 @@
 #ifndef TESTB_H
 #define TESTB_H
 
-#include "object.h"
+#include "uzmq/object.h"
 #include <iostream>
 #include <atomic>
 #include <mutex>
 #include <thread>
 
-class TestC: public px_zmq::Object
+class TestC: public uzmq::Object
 {
 public:
     TestC();
@@ -25,6 +25,10 @@ public:
     void reqC();
 
     void reqD();
+
+    void SubA(const std::string& msg);
+
+    void SubB(const std::string& msg);
 
 private:
     int numA = 0;

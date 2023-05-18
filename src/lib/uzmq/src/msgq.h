@@ -1,5 +1,5 @@
-#ifndef MSGQ_H
-#define MSGQ_H
+#ifndef UZMQ_MSGQ_H
+#define UZMQ_MSGQ_H
 
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
@@ -9,10 +9,9 @@
 #include <atomic>
 #include <iostream>
 #include <boost/asio.hpp>
-#include "object.h"
-#include "message.h"
+#include "uzmq/message.h"
 
-namespace px_zmq
+namespace uzmq
 {
 class MsgQ
 {
@@ -82,10 +81,8 @@ private:
     int mHightWaterLevel = 20000;
 
     std::string mComType = "inproc://";
-
-    std::weak_ptr<Object> mObj;
 };
 }
 
 
-#endif // MSGQ_H
+#endif // UZMQ_MSGQ_H

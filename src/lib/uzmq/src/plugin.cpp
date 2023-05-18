@@ -1,7 +1,7 @@
 #include "plugin.h"
 #include "appinst.h"
 
-namespace px_zmq
+namespace uzmq
 {
 Plugin::Plugin()
 {
@@ -14,13 +14,13 @@ Plugin::~Plugin()
 }
 
 
-Plugin &Plugin::GetInstance()
+Plugin &Plugin::getInstance()
 {
     static Plugin instance;
     return instance;
 }
 
-bool Plugin::Install(const boost::filesystem::path &path)
+bool Plugin::install(const boost::filesystem::path &path)
 {
     boost::dll::shared_library lib(path);
 
@@ -42,7 +42,7 @@ bool Plugin::Install(const boost::filesystem::path &path)
 }
 
 
-bool Plugin::Add(const std::shared_ptr<Object>& obj)
+bool Plugin::add(const std::shared_ptr<Object>& obj)
 {
     if(!obj)
     {
@@ -53,7 +53,7 @@ bool Plugin::Add(const std::shared_ptr<Object>& obj)
     return true;
 }
 
-int Plugin::Exec()
+int Plugin::exec()
 {
     for(auto iter = mObjs.begin(); iter != mObjs.end(); iter++)
     {

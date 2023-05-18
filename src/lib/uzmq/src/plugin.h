@@ -1,26 +1,26 @@
-#ifndef PX_PLUGIN_H
-#define PX_PLUGIN_H
+#ifndef UZMQ_PLUGIN_H
+#define UZMQ_PLUGIN_H
 
-#include <object.h>
+#include "uzmq/object.h"
+#include "uzmq/log.h"
 #include <boost/dll.hpp>
 #include <boost/type_index.hpp>
-#include <log.h>
 #include <map>
 
 
-namespace px_zmq{
+namespace uzmq{
 
 
 class Plugin
 {
 public:
-    static Plugin& GetInstance();
+    static Plugin& getInstance();
 
-    bool Install(const boost::filesystem::path& path);
+    bool install(const boost::filesystem::path& path);
 
-    bool Add(const std::shared_ptr<Object>& obj);
+    bool add(const std::shared_ptr<Object>& obj);
 
-    int Exec();
+    int exec();
 
 private:
     std::map<boost::filesystem::path, boost::dll::shared_library> mDlls;
@@ -35,4 +35,4 @@ private:
 };
 
 }
-#endif // PLUGIN_H
+#endif // UZMQ_PLUGIN_H

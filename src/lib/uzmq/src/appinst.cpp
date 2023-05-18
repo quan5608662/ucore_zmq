@@ -1,42 +1,43 @@
+#include "uzmq/env.h"
 #include "appinst.h"
-#include "env.h"
 #include "plugin.h"
+#include "loggerinst.h"
 
-namespace px_zmq{
+namespace uzmq{
 
 
-void AppInst::SetArgument(int argc, char* argv[])
+void AppInst::setArgument(int argc, char* argv[])
 {
-    Entry().ParseArgument(argc,argv);
+    entry().parseArgument(argc,argv);
 }
 
-int AppInst::Exec()
+int AppInst::exec()
 {   
-    return Entry().Run();
+    return entry().run();
 }
 
 
-const boost::property_tree::ptree &AppInst::CProperties()
+const boost::property_tree::ptree &AppInst::cProperties()
 {
-    return Entry().env_;
+    return entry().mEnv;
 }
 
-boost::property_tree::ptree &AppInst::Properties()
+boost::property_tree::ptree &AppInst::properties()
 {
-    return Entry().env_;
+    return entry().mEnv;
 }
 
-boost::any AppInst::Option(const std::string &key)
+boost::any AppInst::option(const std::string &key)
 {
-    return Entry().options_[key].value();
+    return entry().mOptions[key].value();
 }
 
-void AppInst::SaveEnv()
+void AppInst::saveEnv()
 {
     try
     {
-        auto env_ini = boost::any_cast<std::string>(Option("env"));
-        boost::property_tree::write_ini(env_ini,CProperties());
+        auto env_ini = boost::any_cast<std::string>(option("env"));
+        boost::property_tree::write_ini(env_ini,cProperties());
     }
     catch(std::exception& e)
     {
@@ -44,14 +45,19 @@ void AppInst::SaveEnv()
     }
 }
 
-void AppInst::InitEnv(std::istringstream &stream)
+void AppInst::initEnv(std::istringstream &stream)
 {
-    Entry().InitEnviroment(stream);
+    entry().initEnviroment(stream);
 }
 
-const std::shared_ptr<zmq::context_t> &AppInst::GetZmqContextIo()
+const std::shared_ptr<zmq::context_t> &AppInst::getZmqContextIo()
 {
-    return Entry().mZmpIo;
+    return entry().mZmpIo;
+}
+
+std::shared_ptr<Logger> &AppInst::getDefaultLogger()
+{
+    return entry().mDefaultLogger;
 }
 
 AppInst::AppInst()
@@ -64,7 +70,7 @@ AppInst::~AppInst()
 
 }
 
-void AppInst::ParseArgument(int argc, char *argv[])
+void AppInst::parseArgument(int argc, char *argv[])
 {
     try
     {
@@ -74,10 +80,10 @@ void AppInst::ParseArgument(int argc, char *argv[])
                 ("boost_log_setting,bls",boost::program_options::value<std::string>(),"path of boost log configure file")
                 ("env,e",boost::program_options::value<std::string>(),"application global settings");
 
-        boost::program_options::store(boost::program_options::parse_command_line(argc,argv,desc),options_);
-        boost::program_options::notify(options_);
+        boost::program_options::store(boost::program_options::parse_command_line(argc,argv,desc),mOptions);
+        boost::program_options::notify(mOptions);
 
-        for(auto &iter:options_)
+        for(auto &iter:mOptions)
         {
             PX_INFO()<<iter.first<<"="<<iter.second.as<std::string>();
         }
@@ -89,14 +95,14 @@ void AppInst::ParseArgument(int argc, char *argv[])
 }
 
 
-void AppInst::InitEnviroment()
+void AppInst::initEnviroment()
 {
     try
     {
-        if(options_.count("env"))
+        if(mOptions.count("env"))
         {
             boost::property_tree::ptree env;
-            auto ini = options_["env"].as<std::string>();
+            auto ini = mOptions["env"].as<std::string>();
             boost::property_tree::ini_parser::read_ini(ini, env);
 
             for(auto &group:env)
@@ -105,7 +111,7 @@ void AppInst::InitEnviroment()
                 {
                     auto key = group.first+"."+opt.first;
                     auto value = opt.second.data();
-                    env_.put(key,value);
+                    mEnv.put(key,value);
                 }
             }
         }
@@ -117,17 +123,16 @@ void AppInst::InitEnviroment()
         PX_ERROR()<<e.what();
     }
 
+    mDefaultLogger = LoggerInst::getInstance().createLogger("ucore");
 
-    Logger::Init();
-
-    PrintEnv();
+    printEnv();
 }
 
-void AppInst::InitEnviroment(std::istringstream &stream)
+void AppInst::initEnviroment(std::istringstream &stream)
 {
     try
     {
-        boost::property_tree::ini_parser::read_ini(stream, env_);
+        boost::property_tree::ini_parser::read_ini(stream, mEnv);
     }
     catch (const std::exception& e)
     {
@@ -136,9 +141,9 @@ void AppInst::InitEnviroment(std::istringstream &stream)
 
 }
 
-int AppInst::Run()
+int AppInst::run()
 {
-    InitEnviroment();
+    initEnviroment();
 
     mZmpIo = std::make_shared<zmq::context_t>(0);
     if(mZmpIo == nullptr)
@@ -163,23 +168,23 @@ int AppInst::Run()
     }
 
     std::string dir = (boost::dll::program_location().parent_path().parent_path()/ "plugin/").string();
-    if(options_.count("workspace"))
+    if(mOptions.count("workspace"))
     {
-        dir = options_["workspace"].as<std::string>();
+        dir = mOptions["workspace"].as<std::string>();
         PX_INFO() << "workspace is specified" << dir;
     }
 
-    if(!ScanAndLoad(dir))
+    if(!scanAndLoad(dir))
     {
         return -1;
     }
 
-    Plugin::GetInstance().Exec();
+    Plugin::getInstance().exec();
 
     return mRouter->wait();
 }
 
-bool AppInst::ScanAndLoad(const boost::filesystem::path &dir)
+bool AppInst::scanAndLoad(const boost::filesystem::path &dir)
 {
     if(!boost::filesystem::exists(dir))
     {
@@ -204,17 +209,17 @@ bool AppInst::ScanAndLoad(const boost::filesystem::path &dir)
         {
             continue;
         }
-        Load(iter.path());
+        load(iter.path());
     }
 
     return true;
 }
 
-bool AppInst::Load(const boost::filesystem::path &path)
+bool AppInst::load(const boost::filesystem::path &path)
 {
     try
     {
-        if(!Plugin::GetInstance().Install(path))
+        if(!Plugin::getInstance().install(path))
         {
             return false;
         }
@@ -231,10 +236,10 @@ bool AppInst::Load(const boost::filesystem::path &path)
     return false;
 }
 
-void AppInst::PrintEnv()
+void AppInst::printEnv()
 {
     PX_INFO()<<"-------------------------------------";
-    for(auto &group:env_)
+    for(auto &group:mEnv)
     {
         for(auto &opt:group.second)
         {
@@ -246,13 +251,13 @@ void AppInst::PrintEnv()
     PX_INFO()<<"-------------------------------------";
 }
 
-AppInst &AppInst::Entry()
+AppInst &AppInst::entry()
 {
     static AppInst entry;
     return entry;
 }
 
-std::string AppInst::Translate(const std::string &input)
+std::string AppInst::translate(const std::string &input)
 {
     static std::regex pattern(".*\\$\\{([A-Za-z0-9_]+)\\}.*");
 

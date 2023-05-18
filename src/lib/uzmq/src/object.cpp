@@ -1,10 +1,10 @@
-#include "object.h"
-#include "msg_q.h"
+#include "uzmq/env.h"
+#include "uzmq/object.h"
+#include "msgq.h"
 #include "plugin.h"
 #include "appinst.h"
-#include "env.h"
 
-namespace px_zmq
+namespace uzmq
 {
 
 class Object::Context
@@ -15,7 +15,7 @@ public:
         int xSubPort = PX_ENV("proxy.xsub_port", 65530);
         int xPubPort = PX_ENV("proxy.xpub_port", 65531);
         std::string comType = PX_ENV("proxy.com_type",  "inproc://");
-        auto zmqIo = AppInst::GetZmqContextIo();
+        auto zmqIo = AppInst::getZmqContextIo();
         mMsgQ = std::make_shared<MsgQ>(zmqIo, xSubPort, xPubPort, comType);
     }
 
@@ -45,9 +45,9 @@ Object::~Object()
 
 }
 
-bool Object::Export(const std::shared_ptr<Object>& object)
+bool Object::exportObj(const std::shared_ptr<Object>& object)
 {
-    return Plugin::GetInstance().Add(object);
+    return Plugin::getInstance().add(object);
 }
 
 
@@ -61,7 +61,7 @@ void Object::uninit()
 
 }
 
-void Object::Publish(const int &topic, const std::string &msg)
+void Object::publish(const int &topic, const std::string &msg)
 {
     std::weak_ptr<MsgQ> msgQ = mContext->getMsgQ();
     if(!msgQ.expired())
@@ -70,7 +70,7 @@ void Object::Publish(const int &topic, const std::string &msg)
     }
 }
 
-ReplyData Object::Request(const int &topic, const std::string &msg, const int &timeout)
+ReplyData Object::request(const int &topic, const std::string &msg, const int &timeout)
 {
     ReplyData data;
     std::weak_ptr<MsgQ> msgQ = mContext->getMsgQ();
@@ -82,7 +82,7 @@ ReplyData Object::Request(const int &topic, const std::string &msg, const int &t
     return data;
 }
 
-void Object::Bind(const int &topic, NoReplyFunc func, bool block)
+void Object::bind(const int &topic, NoReplyFunc func, bool block)
 {
     std::weak_ptr<MsgQ> msgQ = mContext->getMsgQ();
     if(!msgQ.expired())
@@ -91,7 +91,7 @@ void Object::Bind(const int &topic, NoReplyFunc func, bool block)
     }
 }
 
-void Object::Bind(const int &topic, ReplyFunc func, bool block)
+void Object::bind(const int &topic, ReplyFunc func, bool block)
 {
     std::weak_ptr<MsgQ> msgQ = mContext->getMsgQ();
     if(!msgQ.expired())
